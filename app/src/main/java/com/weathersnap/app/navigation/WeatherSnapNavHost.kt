@@ -61,7 +61,12 @@ fun WeatherSnapNavHost() {
             )
         }
 
-        composable(Screen.CreateReport.route) {
+        composable(Screen.CreateReport.route) { backStackEntry ->
+            val weatherEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.Weather.route)
+            }
+            val weatherViewModel: com.weathersnap.app.ui.weather.WeatherViewModel = androidx.hilt.navigation.compose.hiltViewModel(weatherEntry)
+            
             CreateReportScreen(
                 onNavigateToCamera = {
                     navController.navigate(Screen.Camera.route)
@@ -73,7 +78,8 @@ fun WeatherSnapNavHost() {
                 },
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
+                weatherViewModel = weatherViewModel
             )
         }
 

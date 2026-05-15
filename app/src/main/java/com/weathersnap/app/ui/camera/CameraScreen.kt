@@ -75,8 +75,8 @@ import com.weathersnap.app.ui.theme.SurfaceColor
 @Composable
 fun CameraScreen(
     onNavigateBack: () -> Unit,
-    viewModel: CameraViewModel = hiltViewModel(),
-    createReportViewModel: CreateReportViewModel = hiltViewModel()
+    onPhotoCaptured: (String, Long, Long) -> Unit,
+    viewModel: CameraViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -103,14 +103,14 @@ fun CameraScreen(
         }
     }
 
-    // When capture succeeds, pass result back to CreateReportViewModel and pop back
+    // When capture succeeds, pass result back
     LaunchedEffect(uiState) {
         if (uiState is CameraUiState.Success) {
             val success = uiState as CameraUiState.Success
-            createReportViewModel.onCameraResultReceived(
-                imagePath = success.imagePath,
-                originalSize = success.originalSize,
-                compressedSize = success.compressedSize
+            onPhotoCaptured(
+                success.imagePath,
+                success.originalSize,
+                success.compressedSize
             )
             onNavigateBack()
         }

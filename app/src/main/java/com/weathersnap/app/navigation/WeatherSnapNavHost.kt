@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -76,10 +77,17 @@ fun WeatherSnapNavHost() {
             )
         }
 
-        composable(Screen.Camera.route) {
+        composable(Screen.Camera.route) { backStackEntry ->
+            val createReportEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.CreateReport.route)
+            }
+            val createReportViewModel: com.weathersnap.app.ui.create_report.CreateReportViewModel = androidx.hilt.navigation.compose.hiltViewModel(createReportEntry)
             CameraScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onPhotoCaptured = { path, originalSize, compressedSize ->
+                    createReportViewModel.onCameraResultReceived(path, originalSize, compressedSize)
                 }
             )
         }

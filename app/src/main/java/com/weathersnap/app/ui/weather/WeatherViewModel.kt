@@ -54,7 +54,12 @@ class WeatherViewModel @Inject constructor(
 
     fun onQueryChanged(query: String) {
         _searchQuery.value = query
-        if (query.length <= 2) {
+        if (query.isEmpty()) {
+            _weatherState.value = WeatherUiState.Idle
+            _selectedWeather.value = null
+            _suggestionsState.value = SuggestionsState.Hidden
+            weatherJob?.cancel()
+        } else if (query.length <= 2) {
             _suggestionsState.value = SuggestionsState.Hidden
         }
     }

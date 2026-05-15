@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -137,7 +138,11 @@ fun SavedReportsScreen(
                                 items = state.reports,
                                 key = { _, report -> report.id }
                             ) { index, report ->
-                                ReportCard(report = report, index = index)
+                                ReportCard(
+                                    report = report,
+                                    index = index,
+                                    onDelete = { viewModel.deleteReport(report) }
+                                )
                             }
                             item { Spacer(modifier = Modifier.height(16.dp)) }
                         }
@@ -163,7 +168,7 @@ fun SavedReportsScreen(
 }
 
 @Composable
-private fun ReportCard(report: WeatherReportEntity, index: Int) {
+private fun ReportCard(report: WeatherReportEntity, index: Int, onDelete: () -> Unit) {
     AnimatedVisibility(
         visible = true,
         enter = fadeIn(tween(300 + index * 50)) + slideInVertically(tween(300 + index * 50)) { it / 4 }
@@ -241,12 +246,23 @@ private fun ReportCard(report: WeatherReportEntity, index: Int) {
                                 color = AccentColor
                             )
                         }
-                        Text(
-                            text = "${report.temperature}°C",
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = AccentColor,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "${report.temperature}°C",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = AccentColor,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete Report",
+                                    tint = ErrorColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))

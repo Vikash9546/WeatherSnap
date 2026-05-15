@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.weathersnap.app.data.repository.WeatherReportRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,5 +37,15 @@ class SavedReportsViewModel @Inject constructor(
                 _uiState.value = SavedReportsUiState.Error(e.message ?: "Unknown error")
             }
             .launchIn(viewModelScope)
+    }
+
+    fun deleteReport(report: com.weathersnap.app.data.local.entity.WeatherReportEntity) {
+        viewModelScope.launch {
+            try {
+                repository.deleteReport(report)
+            } catch (e: Exception) {
+                // Could handle delete error if needed
+            }
+        }
     }
 }

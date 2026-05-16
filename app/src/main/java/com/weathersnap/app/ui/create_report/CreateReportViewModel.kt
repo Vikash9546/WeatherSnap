@@ -61,7 +61,7 @@ class CreateReportViewModel @Inject constructor(
                         humidity = draft.humidity,
                         windSpeed = draft.windSpeed,
                         pressure = draft.pressure,
-                        weatherCode = 0
+                        weatherCode = draft.weatherCode
                     )
                     _notes.value = draft.notes
                     _imagePath.value = draft.imagePath
@@ -118,6 +118,7 @@ class CreateReportViewModel @Inject constructor(
                     humidity = weather.humidity,
                     windSpeed = weather.windSpeed,
                     pressure = weather.pressure,
+                    weatherCode = weather.weatherCode,
                     notes = _notes.value,
                     imagePath = _imagePath.value,
                     originalSize = _originalSize.value,
@@ -157,9 +158,27 @@ class CreateReportViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Explicitly discard the in-progress draft (e.g., user presses "Discard").
+     * Cleans up the temporary image file and removes the draft from Room.
+     */
+    fun discardDraft() {
+        viewModelScope.launch {
+            _imagePath.value?.let { ImageCompressor.deleteSafely(it) }
+            draftRepository.clearDraft()
+            _notes.value = ""
+            _imagePath.value = null
+            _originalSize.value = null
+            _compressedSize.value = null
+            _weatherSnapshot.value = null
+            _uiState.value = CreateReportUiState.Idle
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
-        // If report was NOT saved and we have a draft, keep image for recovery
-        // Temp file cleanup happens only when draft is explicitly cleared (after save)
+        // If report was NOT saved and we have a draft, keep image for recovery.
+        // Temp file cleanup happens only when draft is explicitly cleared
+        // (after save or discard).
     }
 }

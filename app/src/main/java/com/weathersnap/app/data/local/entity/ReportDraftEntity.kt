@@ -17,6 +17,7 @@ data class ReportDraftEntity(
     val humidity: Int,
     val windSpeed: Double,
     val pressure: Double,
+    val weatherCode: Int,
     val notes: String,
     val imagePath: String?,
     val originalSize: Long?,

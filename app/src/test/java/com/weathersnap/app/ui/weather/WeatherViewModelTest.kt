@@ -1,10 +1,10 @@
 package com.weathersnap.app.ui.weather
 
 import app.cash.turbine.test
-import com.weathersnap.app.data.repository.GeocodingRepository
-import com.weathersnap.app.data.repository.WeatherRepository
 import com.weathersnap.app.domain.model.GeocodingResult
 import com.weathersnap.app.domain.model.WeatherData
+import com.weathersnap.app.domain.usecase.GetWeatherUseCase
+import com.weathersnap.app.domain.usecase.SearchCityUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -23,14 +23,14 @@ import org.junit.Test
 class WeatherViewModelTest {
 
     private lateinit var viewModel: WeatherViewModel
-    private val geocodingRepository: GeocodingRepository = mockk(relaxed = true)
-    private val weatherRepository: WeatherRepository = mockk(relaxed = true)
+    private val searchCityUseCase: SearchCityUseCase = mockk(relaxed = true)
+    private val getWeatherUseCase: GetWeatherUseCase = mockk(relaxed = true)
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = WeatherViewModel(geocodingRepository, weatherRepository)
+        viewModel = WeatherViewModel(searchCityUseCase, getWeatherUseCase)
     }
 
     @After
@@ -50,8 +50,8 @@ class WeatherViewModelTest {
         val location = GeocodingResult(1L, query, 51.5, -0.12, "UK", "London")
         val weather = WeatherData(query, 20.0, "Sunny", 60, 5.0, 1013.0, 0)
 
-        coEvery { geocodingRepository.searchCity(any()) } returns Result.success(listOf(location))
-        coEvery { weatherRepository.getWeather(any()) } returns Result.success(weather)
+        coEvery { searchCityUseCase(any()) } returns Result.success(listOf(location))
+        coEvery { getWeatherUseCase(any()) } returns Result.success(weather)
 
         // When
         viewModel.onQueryChanged(query)

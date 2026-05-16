@@ -23,7 +23,9 @@ object DatabaseModule {
             context,
             WeatherSnapDatabase::class.java,
             "weather_snap.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     fun provideWeatherReportDao(db: WeatherSnapDatabase): WeatherReportDao =

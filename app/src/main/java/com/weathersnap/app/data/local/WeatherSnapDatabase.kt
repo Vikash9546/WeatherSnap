@@ -9,7 +9,7 @@ import com.weathersnap.app.data.local.entity.WeatherReportEntity
 
 @Database(
     entities = [WeatherReportEntity::class, ReportDraftEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class WeatherSnapDatabase : RoomDatabase() {

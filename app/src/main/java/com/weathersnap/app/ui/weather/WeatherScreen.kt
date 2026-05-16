@@ -228,11 +228,11 @@ private fun SuggestionsDropdown(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 4.dp)
             .heightIn(max = 400.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E211A)),
-        border = BorderStroke(1.dp, Color(0xFF2B2F26))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF2D3228)),
+        border = BorderStroke(1.dp, Color(0xFF3E4338))
     ) {
         when (state) {
             is SuggestionsState.Loading -> {
@@ -268,9 +268,9 @@ private fun SuggestionsDropdown(
                             )
                             if (index < state.suggestions.size - 1) {
                                 HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    thickness = 1.dp,
-                                    color = Color(0xFF2B2F26)
+                                    modifier = Modifier.padding(horizontal = 0.dp),
+                                    thickness = 0.5.dp,
+                                    color = Color(0xFF3E4338)
                                 )
                             }
                         }
@@ -299,16 +299,16 @@ private fun SuggestionItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(vertical = 10.dp, horizontal = 16.dp),
+            .padding(vertical = 8.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(46.dp),
-            shape = RoundedCornerShape(23.dp),
+                .height(44.dp),
+            shape = RoundedCornerShape(22.dp),
             color = Color.Transparent,
-            border = BorderStroke(1.dp, Color(0xFF3E4338))
+            border = BorderStroke(1.dp, Color(0xFF454B3F))
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
@@ -317,7 +317,8 @@ private fun SuggestionItem(
                     color = Color(0xFFB4B9AE),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = 13.sp
                 )
             }
         }

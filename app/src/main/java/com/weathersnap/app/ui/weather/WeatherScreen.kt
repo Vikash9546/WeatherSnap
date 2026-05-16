@@ -430,19 +430,19 @@ private fun WeatherSuccessState(
                 WeatherStatCard(
                     label = "Humidity",
                     value = "${weather.humidity}%",
-                    valueColor = Color(0xFF2D6351),
+                    color = Color(0xFF4DB6AC),
                     modifier = Modifier.weight(1f)
                 )
                 WeatherStatCard(
                     label = "Wind",
                     value = "${weather.windSpeed} m/s",
-                    valueColor = Color(0xFF335071),
+                    color = Color(0xFF64B5F6),
                     modifier = Modifier.weight(1f)
                 )
                 WeatherStatCard(
                     label = "Pressure",
                     value = "${weather.pressure}",
-                    valueColor = Color(0xFF634D2D),
+                    color = Color(0xFFFFB74D),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -553,20 +553,36 @@ private fun WeatherHeader(onNavigateToSavedReports: () -> Unit) {
 private fun WeatherStatCard(
     label: String,
     value: String,
-    valueColor: Color,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.height(64.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF2B2F26))
+        modifier = modifier.height(68.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.12f)
+        )
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color(0xFF6B7264), fontSize = 10.sp)
-            Text(text = value, style = MaterialTheme.typography.bodyMedium, color = valueColor, fontWeight = FontWeight.Bold)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = color.copy(alpha = 0.7f),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                color = color,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

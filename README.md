@@ -125,32 +125,91 @@ com.weathersnap.app/
 
 **Solution — Room-Backed Singleton Draft**:
 
-The `CreateReportViewModel` persists the complete in-progress report to a Room `report_drafts` table after every change (notes typed, photo captured). This table uses a **singleton pattern** (fixed `id = 1` with `OnConflictStrategy.REPLACE`), ensuring only one draft exists at a time.
+I chose to persist the complete in-progress report to a Room `report_drafts` table after every user action (notes typed, photo captured). This table uses a **singleton pattern** (fixed `id = 1` with `OnConflictStrategy.REPLACE`), guaranteeing exactly zero or one draft exists at any time.
 
-| Scenario | Behavior |
+#### Draft Lifecycle Flow
+
+```
+User selects weather → Opens Create Report
+        │
+        ▼
+  ┌─────────────────────────────┐
+  │  initWithWeather() called   │
+  │  Check Room for draft       │
+  └──────────┬──────────────────┘
+             │
+     ┌───────┴────────┐
+     │ Draft exists?  │
+     └───┬────────┬───┘
+        Yes       No
+         │         │
+  ┌──────┴───┐  ┌──┴──────────────┐
+  │Same city?│  │ Use passed      │
+  └──┬────┬──┘  │ weather, persist│
+    Yes   No    │ initial draft   │
+     │     │    └─────────────────┘
+     │     │
+     │  ┌──┴─────────────────────┐
+     │  │ Delete old draft image │
+     │  │ Clear draft in Room    │
+     │  │ Start fresh            │
+     │  └────────────────────────┘
+     │
+  ┌──┴───────────────────────────┐
+  │ Restore weather snapshot,    │
+  │ notes, image from Room       │
+  │ (exact values preserved)     │
+  └──────────────────────────────┘
+        │
+        ▼  (User edits notes / captures photo)
+  ┌─────────────────────────────┐
+  │ persistDraft() after every  │
+  │ change → Room INSERT/REPLACE│
+  └─────────────────────────────┘
+        │
+        ▼  (User taps "Save Report")
+  ┌─────────────────────────────┐
+  │ saveReport()                │
+  │ 1. Insert into reports table│
+  │ 2. Clear draft from Room    │
+  │ 3. Navigate to Saved Reports│
+  └─────────────────────────────┘
+```
+
+#### How Each Requirement Is Met
+
+| Requirement | How It's Handled |
 |:---|:---|
-| **Device rotation** | ViewModel survives config change; draft is also in Room as a safety net |
-| **Process death** | On re-entry, `initWithWeather()` finds the draft in Room and restores the **exact weather snapshot** (including `weatherCode` for icons), notes, and image path |
-| **Same city, resume** | Draft is fully restored — zero data loss |
-| **Different city selected** | Old draft's image file is **deleted from disk**, draft is cleared in Room, fresh draft is created for the new city |
-| **Report saved successfully** | Draft is cleared from Room; image ownership transfers to the saved report |
-| **Draft explicitly discarded** | `discardDraft()` deletes the temp image file and clears the Room entry |
+| **Rotation recovery** | `ViewModel` survives config changes natively. Room draft acts as a safety net if the ViewModel is also destroyed. |
+| **Process death recovery** | On re-entry, `initWithWeather(null)` queries Room and restores the **exact weather snapshot** — including `weatherCode` for weather icons — notes, and image path. |
+| **No duplicate reports** | The draft uses a singleton row (`id = 1`). `saveReport()` inserts into the `weather_reports` table, then clears the draft. Since these happen sequentially in one coroutine, the draft is always cleared after a successful save — never left behind to become a duplicate. |
+| **Exact weather snapshot** | All weather fields (city, temperature, condition, humidity, windSpeed, pressure, **weatherCode**) are persisted in the draft entity. The restored `WeatherData` is reconstructed from the draft, not re-fetched from the API. |
+| **No temp file leaks** | Files are cleaned up at four points: (1) retaking a photo deletes the previous image, (2) switching cities deletes the old draft's image, (3) `discardDraft()` deletes the image, (4) deleting a saved report deletes its image via the repository. |
 
-**Why this approach?**
+#### Why Room Over Alternatives?
 
-- **Not `SavedStateHandle`**: `SavedStateHandle` can't hold large image paths reliably across process death, and can't survive full app kills. Room is durable.
-- **Not `onSaveInstanceState`**: Same limitations as `SavedStateHandle`, plus Compose doesn't use it naturally.
-- **Not `ViewModel` alone**: ViewModels survive config changes but not process death. Room survives everything.
+| Alternative | Why Not |
+|:---|:---|
+| `SavedStateHandle` | Limited to ~1MB (Bundle limits). Cannot survive full app kills. Doesn't persist across `finish()`/re-launch. |
+| `ViewModel` alone | Survives rotation but **not** process death. Insufficient for full lifecycle protection. |
+| `SharedPreferences` | Not transactional. No type safety. No reactive observation. |
+| `DataStore` | Viable, but adds complexity for what is fundamentally a structured record. Room's relational model is a better fit since we already use Room for saved reports. |
 
-**Trade-offs**:
-- Minor write overhead (Room `INSERT OR REPLACE` on each keystroke), mitigated by Room's efficient single-row operations.
-- Draft cleanup relies on explicit lifecycle hooks (`saveReport()`, `discardDraft()`, `initWithWeather()` on city switch) rather than automated garbage collection.
+#### Trade-offs
 
-**Key implementation files**:
-- [`CreateReportViewModel.kt`](app/src/main/java/com/weathersnap/app/ui/create_report/CreateReportViewModel.kt) — Draft persistence logic
-- [`ReportDraftEntity.kt`](app/src/main/java/com/weathersnap/app/data/local/entity/ReportDraftEntity.kt) — Singleton Room entity
-- [`ReportDraftDao.kt`](app/src/main/java/com/weathersnap/app/data/local/dao/ReportDraftDao.kt) — DAO with `INSERT OR REPLACE`
-- [`ReportDraftRepository.kt`](app/src/main/java/com/weathersnap/app/data/repository/ReportDraftRepository.kt) — IO-safe repository wrapper
+- **Write overhead**: Room `INSERT OR REPLACE` fires on every keystroke. For a single-row table this is negligible (~0.1ms per write), but could theoretically be debounced further.
+- **Explicit cleanup**: Draft image files are cleaned up at well-defined lifecycle points rather than by a background sweep. This is simpler but means a crash during `saveReport()` could theoretically orphan a file — an acceptable edge case.
+- **Single draft at a time**: Only one in-progress report can exist. This matches the app's single-user, single-flow design.
+
+#### Key Implementation Files
+
+- [`CreateReportViewModel.kt`](app/src/main/java/com/weathersnap/app/ui/create_report/CreateReportViewModel.kt) — `initWithWeather()`, `persistDraft()`, `saveReport()`, `discardDraft()`
+- [`ReportDraftEntity.kt`](app/src/main/java/com/weathersnap/app/data/local/entity/ReportDraftEntity.kt) — Singleton Room entity with all weather fields + `weatherCode`
+- [`ReportDraftDao.kt`](app/src/main/java/com/weathersnap/app/data/local/dao/ReportDraftDao.kt) — `@Insert(onConflict = REPLACE)`, `@Query DELETE`
+- [`ReportDraftRepository.kt`](app/src/main/java/com/weathersnap/app/data/repository/ReportDraftRepository.kt) — `withContext(Dispatchers.IO)` wrapper
+- [`ImageCompressor.kt`](app/src/main/java/com/weathersnap/app/util/ImageCompressor.kt) — `deleteSafely()` for temp file cleanup
+
+
 
 ### 8. Navigation, Animations & UX Polish (4%)
 

@@ -1,6 +1,6 @@
 # WeatherSnap
 
-A production-grade Android weather reporting app built with Kotlin, Jetpack Compose, Hilt, Room, CameraX, and Retrofit.
+Android weather reporting app built with Kotlin, Jetpack Compose, Hilt, Room, CameraX, and Retrofit.
 
 ---
 

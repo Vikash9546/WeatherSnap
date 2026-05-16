@@ -93,6 +93,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // Exif
+    implementation(libs.androidx.exifinterface)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,10 +1,10 @@
-# WeatherSnap 🌤️📸
+# WeatherSnap
 
 A production-grade Android weather reporting application built with **Kotlin**, **Jetpack Compose**, and modern Android architecture. WeatherSnap allows users to search for real-time weather data, capture geo-tagged weather photos using a custom CameraX implementation, and persist annotated reports locally with Room.
 
 ---
 
-## 📱 Screens
+## Screens
 
 | Weather Home | Create Report | Custom Camera | Saved Reports |
 |:---:|:---:|:---:|:---:|
@@ -12,7 +12,7 @@ A production-grade Android weather reporting application built with **Kotlin**, 
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 WeatherSnap follows **Clean Architecture** with strict **MVVM** separation across three layers:
 
@@ -68,7 +68,7 @@ com.weathersnap.app/
 
 ---
 
-## 📋 Evaluation Criteria Fulfillment
+## Evaluation Criteria Fulfillment
 
 ### 1. MVVM Architecture & Code Organization (18%)
 
@@ -227,7 +227,7 @@ User selects weather → Opens Create Report
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category | Technology | Version |
 |:---|:---|:---|
@@ -244,7 +244,7 @@ User selects weather → Opens Create Report
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 1. **Clone** the repository:
    ```bash
@@ -264,6 +264,3 @@ User selects weather → Opens Create Report
 
 ---
 
-## 📄 License
-
-This project is for educational and evaluation purposes.

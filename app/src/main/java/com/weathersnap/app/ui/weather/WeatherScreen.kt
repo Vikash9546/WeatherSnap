@@ -19,6 +19,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -108,99 +109,60 @@ fun WeatherScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            WeatherHeader(onNavigateToSavedReports = onNavigateToSavedReports)
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Search section
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(SurfaceColor, RoundedCornerShape(12.dp))
+                    .padding(16.dp)
             ) {
                 Column {
-                    Text(
-                        text = "WeatherSnap",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = AccentColor,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Live weather at your fingertips",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = SecondaryTextColor
-                    )
-                }
-                TextButton(
-                    onClick = onNavigateToSavedReports,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.BookmarkBorder,
-                        contentDescription = "Reports",
-                        tint = AccentColor,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Reports",
-                        color = AccentColor,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Search field
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { viewModel.onQueryChanged(it) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text(
-                        "Search city...",
-                        color = SecondaryTextColor
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = null,
-                        tint = AccentColor
-                    )
-                },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        Icon(
-                            Icons.Default.KeyboardArrowDown,
-                            contentDescription = null,
-                            tint = SecondaryTextColor
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { viewModel.onQueryChanged(it) },
+                            modifier = Modifier.weight(1f),
+                            label = { Text("City", color = SecondaryTextColor, fontSize = 12.sp) },
+                            placeholder = { Text("Search city...", color = SecondaryTextColor) },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = AccentColor,
+                                unfocusedBorderColor = CardBorderColor,
+                                focusedContainerColor = BackgroundColor,
+                                unfocusedContainerColor = BackgroundColor,
+                                cursorColor = AccentColor,
+                                focusedTextColor = Color(0xFFE8F0D0),
+                                unfocusedTextColor = Color(0xFFE8F0D0)
+                            ),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
                         )
+                        Button(
+                            onClick = { focusManager.clearFocus() },
+                            modifier = Modifier.height(56.dp),
+                            shape = RoundedCornerShape(28.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC5E1A5)),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                        ) {
+                            Text("Search", color = Color(0xFF1B5E20), fontWeight = FontWeight.Bold)
+                        }
                     }
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = AccentColor,
-                    unfocusedBorderColor = CardBorderColor,
-                    focusedContainerColor = SurfaceColor,
-                    unfocusedContainerColor = SurfaceColor,
-                    cursorColor = AccentColor,
-                    focusedTextColor = Color(0xFFE8F0D0),
-                    unfocusedTextColor = Color(0xFFE8F0D0)
-                ),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
-            )
-
-            // Helper text
-            AnimatedVisibility(
-                visible = searchQuery.length <= 2,
-                enter = fadeIn(tween(300)),
-                exit = fadeOut(tween(200))
-            ) {
-                Text(
-                    text = "Enter more than 2 letters to start city suggestions.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SecondaryTextColor,
-                    modifier = Modifier.padding(start = 4.dp, top = 6.dp)
-                )
+                    Text(
+                        text = "Enter more than 2 letters to start city suggestions.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SecondaryTextColor,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -423,101 +385,172 @@ private fun WeatherSuccessState(
     weather: WeatherData,
     onCreateReport: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        // Main weather card
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, CardBorderColor, RoundedCornerShape(20.dp)),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                // City & icon header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column {
-                        Text(
-                            text = weather.cityName,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = Color(0xFFE8F0D0),
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = weather.condition,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = AccentColor
-                        )
-                    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, CardBorderColor, RoundedCornerShape(12.dp)),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
                     Text(
-                        text = WeatherCodeUtil.getWeatherIcon(weather.weatherCode),
-                        fontSize = 48.sp
+                        text = weather.cityName,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = Color(0xFFE8F0D0),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = weather.condition,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = SecondaryTextColor
                     )
                 }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Temperature
-                Text(
-                    text = "${weather.temperature}°C",
-                    style = MaterialTheme.typography.displaySmall,
-                    color = AccentColor,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                HorizontalDivider(color = CardBorderColor.copy(alpha = 0.5f))
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Stats grid
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    WeatherStatItem(
-                        icon = "💧",
-                        label = "Humidity",
-                        value = "${weather.humidity}%",
-                        modifier = Modifier.weight(1f)
-                    )
-                    WeatherStatItem(
-                        icon = "💨",
-                        label = "Wind",
-                        value = "${weather.windSpeed} km/h",
-                        modifier = Modifier.weight(1f)
-                    )
-                    WeatherStatItem(
-                        icon = "🔽",
-                        label = "Pressure",
-                        value = "${weather.pressure} hPa",
-                        modifier = Modifier.weight(1f)
+                Box(
+                    modifier = Modifier
+                        .background(Color(0xFF33691E).copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = "${weather.temperature}°C",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = Color(0xFFE8F0D0),
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                WeatherStatCard(
+                    label = "Humidity",
+                    value = "${weather.humidity}%",
+                    valueColor = Color(0xFF4DB6AC),
+                    modifier = Modifier.weight(1f)
+                )
+                WeatherStatCard(
+                    label = "Wind",
+                    value = "${weather.windSpeed} m/s",
+                    valueColor = Color(0xFF64B5F6),
+                    modifier = Modifier.weight(1f)
+                )
+                WeatherStatCard(
+                    label = "Pressure",
+                    value = "${weather.pressure}",
+                    valueColor = Color(0xFFFFB74D),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFFFFFFF).copy(alpha = 0.05f), RoundedCornerShape(8.dp))
+                    .padding(14.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Report readiness", color = SecondaryTextColor, fontSize = 12.sp)
+                    Text("Camera and Room DB enabled", color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = onCreateReport,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC5E1A5))
+            ) {
+                Text("Create Report", color = Color(0xFF1B5E20), fontWeight = FontWeight.Bold)
+            }
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Create Report button
-        Button(
-            onClick = onCreateReport,
+@Composable
+private fun WeatherHeader(onNavigateToSavedReports: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = AccentColor,
-                contentColor = BackgroundColor
-            )
+                .fillMaxSize()
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(Color(0xFFB9D697), Color(0xFF8FB9A8))
+                    )
+                )
+                .padding(16.dp)
         ) {
-            Text(
-                text = "Create Weather Report",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
-            )
+            Column(modifier = Modifier.align(Alignment.CenterStart)) {
+                Text(
+                    text = "WeatherSnap",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color(0xFF1B3008),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Live weather reports with camera evidence",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF1B3008).copy(alpha = 0.7f)
+                )
+            }
+            Button(
+                onClick = onNavigateToSavedReports,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .height(32.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1B3008)),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("Reports", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeatherStatCard(
+    label: String,
+    value: String,
+    valueColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.height(60.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF).copy(alpha = 0.05f))
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = label, style = MaterialTheme.typography.labelSmall, color = SecondaryTextColor)
+            Text(text = value, style = MaterialTheme.typography.bodyMedium, color = valueColor, fontWeight = FontWeight.Bold)
         }
     }
 }

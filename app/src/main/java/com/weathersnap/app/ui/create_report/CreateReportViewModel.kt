@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.weathersnap.app.data.local.entity.ReportDraftEntity
 import com.weathersnap.app.data.local.entity.WeatherReportEntity
 import com.weathersnap.app.data.repository.ReportDraftRepository
-import com.weathersnap.app.data.repository.WeatherReportRepository
+import com.weathersnap.app.domain.usecase.SaveWeatherReportUseCase
 import com.weathersnap.app.domain.model.WeatherData
 import com.weathersnap.app.ui.weather.WeatherViewModel
 import com.weathersnap.app.util.ImageCompressor
@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateReportViewModel @Inject constructor(
-    private val reportRepository: WeatherReportRepository,
+    private val saveWeatherReportUseCase: SaveWeatherReportUseCase,
     private val draftRepository: ReportDraftRepository,
     @ApplicationContext private val context: Context,
     private val savedStateHandle: SavedStateHandle
@@ -124,7 +124,7 @@ class CreateReportViewModel @Inject constructor(
                     notes = _notes.value,
                     timestamp = System.currentTimeMillis()
                 )
-                reportRepository.saveReport(entity)
+                saveWeatherReportUseCase(entity)
                 // Clear draft after successful save
                 draftRepository.clearDraft()
                 _uiState.value = CreateReportUiState.Saved

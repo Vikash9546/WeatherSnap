@@ -2,8 +2,8 @@ package com.weathersnap.app.ui.weather
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.weathersnap.app.data.repository.GeocodingRepository
-import com.weathersnap.app.data.repository.WeatherRepository
+import com.weathersnap.app.domain.usecase.GetWeatherUseCase
+import com.weathersnap.app.domain.usecase.SearchCityUseCase
 import com.weathersnap.app.domain.model.GeocodingResult
 import com.weathersnap.app.domain.model.WeatherData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,8 +23,8 @@ import javax.inject.Inject
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
-    private val geocodingRepository: GeocodingRepository,
-    private val weatherRepository: WeatherRepository
+    private val searchCityUseCase: SearchCityUseCase,
+    private val getWeatherUseCase: GetWeatherUseCase
 ) : ViewModel() {
 
     private val _weatherState = MutableStateFlow<WeatherUiState>(WeatherUiState.Idle)
@@ -71,7 +71,7 @@ class WeatherViewModel @Inject constructor(
     private fun fetchSuggestions(query: String) {
         viewModelScope.launch {
             _suggestionsState.value = SuggestionsState.Loading
-            val result = geocodingRepository.searchCity(query)
+            val result = searchCityUseCase(query)
             result.fold(
                 onSuccess = { list ->
                     _suggestionsState.value = if (list.isEmpty()) {
@@ -100,7 +100,7 @@ class WeatherViewModel @Inject constructor(
         weatherJob?.cancel()
         weatherJob = viewModelScope.launch {
             _weatherState.value = WeatherUiState.Loading
-            val result = weatherRepository.getWeather(location)
+            val result = getWeatherUseCase(location)
             result.fold(
                 onSuccess = { weather ->
                     _selectedWeather.value = weather
@@ -120,7 +120,7 @@ class WeatherViewModel @Inject constructor(
         if (query.length > 2) {
             viewModelScope.launch {
                 _suggestionsState.value = SuggestionsState.Loading
-                val result = geocodingRepository.searchCity(query)
+                val result = searchCityUseCase(query)
                 result.fold(
                     onSuccess = { list ->
                         val first = list.firstOrNull()
@@ -153,7 +153,7 @@ class WeatherViewModel @Inject constructor(
             _suggestionsState.value = SuggestionsState.Hidden
             _weatherState.value = WeatherUiState.Loading
             
-            val result = geocodingRepository.searchCity(query)
+            val result = searchCityUseCase(query)
             result.fold(
                 onSuccess = { list ->
                     val first = list.firstOrNull()

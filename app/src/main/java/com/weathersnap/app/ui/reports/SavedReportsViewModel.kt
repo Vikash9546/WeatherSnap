@@ -2,7 +2,8 @@ package com.weathersnap.app.ui.reports
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.weathersnap.app.data.repository.WeatherReportRepository
+import com.weathersnap.app.domain.usecase.DeleteWeatherReportUseCase
+import com.weathersnap.app.domain.usecase.GetAllWeatherReportsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,14 +18,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SavedReportsViewModel @Inject constructor(
-    private val repository: WeatherReportRepository
+    private val getAllWeatherReportsUseCase: GetAllWeatherReportsUseCase,
+    private val deleteWeatherReportUseCase: DeleteWeatherReportUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SavedReportsUiState>(SavedReportsUiState.Loading)
     val uiState: StateFlow<SavedReportsUiState> = _uiState.asStateFlow()
 
     init {
-        repository.getAllReports()
+        getAllWeatherReportsUseCase()
             .flowOn(Dispatchers.IO)
             .onEach { reports ->
                 _uiState.value = if (reports.isEmpty()) {
@@ -42,7 +44,7 @@ class SavedReportsViewModel @Inject constructor(
     fun deleteReport(report: com.weathersnap.app.data.local.entity.WeatherReportEntity) {
         viewModelScope.launch {
             try {
-                repository.deleteReport(report)
+                deleteWeatherReportUseCase(report)
             } catch (e: Exception) {
                 // Could handle delete error if needed
             }

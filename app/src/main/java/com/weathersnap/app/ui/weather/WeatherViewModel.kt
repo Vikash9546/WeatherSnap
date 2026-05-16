@@ -41,18 +41,20 @@ class WeatherViewModel @Inject constructor(
     val selectedWeather: StateFlow<WeatherData?> = _selectedWeather.asStateFlow()
 
     private var weatherJob: Job? = null
+    private var isManualSearch = true
 
     init {
         // Debounce search to avoid rapid API calls
         _searchQuery
             .debounce(400)
             .distinctUntilChanged()
-            .filter { it.length > 2 }
+            .filter { isManualSearch && it.length > 2 }
             .onEach { query -> fetchSuggestions(query) }
             .launchIn(viewModelScope)
     }
 
     fun onQueryChanged(query: String) {
+        isManualSearch = true
         _searchQuery.value = query
         if (query.isEmpty()) {
             _weatherState.value = WeatherUiState.Idle
@@ -86,6 +88,7 @@ class WeatherViewModel @Inject constructor(
     }
 
     fun onSuggestionSelected(location: GeocodingResult) {
+        isManualSearch = false
         _suggestionsState.value = SuggestionsState.Hidden
         _searchQuery.value = location.displayName
         fetchWeather(location)

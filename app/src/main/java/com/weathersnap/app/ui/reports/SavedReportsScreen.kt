@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -260,17 +261,35 @@ private fun ReportCard(report: WeatherReportEntity, index: Int, onDelete: () -> 
                             )
                         }
                         
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0xFF323B06), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 12.dp, vertical = 10.dp)
-                        ) {
-                            Text(
-                                text = "${report.temperature}°C",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color(0xFFC2D68C),
-                                fontWeight = FontWeight.Bold
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFF323B06), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                            ) {
+                                Text(
+                                    text = "${report.temperature}°C",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color(0xFFC2D68C),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            
+                            Spacer(modifier = Modifier.width(8.dp))
+                            
+                            IconButton(
+                                onClick = onDelete,
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .background(Color(0xFF383C33), CircleShape)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete report",
+                                    tint = Color(0xFFCF6679),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
 

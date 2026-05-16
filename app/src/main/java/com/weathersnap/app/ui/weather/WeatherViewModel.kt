@@ -91,7 +91,7 @@ class WeatherViewModel @Inject constructor(
         isManualSearch = false
         _suggestionsState.value = SuggestionsState.Hidden
         _searchQuery.value = location.displayName
-        fetchWeather(location)
+        // We no longer call fetchWeather here immediately as per user request
     }
 
     private fun fetchWeather(location: GeocodingResult) {
@@ -133,6 +133,33 @@ class WeatherViewModel @Inject constructor(
                     }
                 )
             }
+        }
+    }
+
+    fun performSearch() {
+        val query = _searchQuery.value.trim()
+        if (query.isEmpty()) return
+
+        viewModelScope.launch {
+            _suggestionsState.value = SuggestionsState.Hidden
+            _weatherState.value = WeatherUiState.Loading
+            
+            val result = geocodingRepository.searchCity(query)
+            result.fold(
+                onSuccess = { list ->
+                    val first = list.firstOrNull()
+                    if (first != null) {
+                        onSuggestionSelected(first)
+                    } else {
+                        _weatherState.value = WeatherUiState.Error("City '$query' not found. Try a different name.")
+                    }
+                },
+                onFailure = { e ->
+                    _weatherState.value = WeatherUiState.Error(
+                        e.message ?: "Search failed. Check your connection."
+                    )
+                }
+            )
         }
     }
 

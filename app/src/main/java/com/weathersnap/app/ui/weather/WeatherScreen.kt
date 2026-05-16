@@ -143,10 +143,16 @@ fun WeatherScreen(
                             ),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                            keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
+                            keyboardActions = KeyboardActions(onSearch = {
+                                viewModel.performSearch()
+                                focusManager.clearFocus()
+                            })
                         )
                         Button(
-                            onClick = { focusManager.clearFocus() },
+                            onClick = {
+                                viewModel.performSearch()
+                                focusManager.clearFocus()
+                            },
                             modifier = Modifier.height(50.dp),
                             shape = RoundedCornerShape(25.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC2D68C)),

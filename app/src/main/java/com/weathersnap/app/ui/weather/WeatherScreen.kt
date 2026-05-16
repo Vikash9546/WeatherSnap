@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,6 +34,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -226,7 +228,8 @@ private fun SuggestionsDropdown(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .heightIn(max = 400.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E211A)),
         border = BorderStroke(1.dp, Color(0xFF2B2F26))
@@ -257,8 +260,8 @@ private fun SuggestionsDropdown(
                         Text("No cities found", color = Color(0xFF6B7264))
                     }
                 } else {
-                    Column {
-                        state.suggestions.forEachIndexed { index, suggestion ->
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        itemsIndexed(state.suggestions) { index, suggestion ->
                             SuggestionItem(
                                 suggestion = suggestion,
                                 onClick = { onSuggestionSelected(suggestion) }

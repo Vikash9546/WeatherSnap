@@ -42,6 +42,7 @@ class WeatherViewModel @Inject constructor(
 
     private var weatherJob: Job? = null
     private var isManualSearch = true
+    private var lastSelectedLocation: GeocodingResult? = null
 
     init {
         // Debounce search to avoid rapid API calls
@@ -60,6 +61,7 @@ class WeatherViewModel @Inject constructor(
             _weatherState.value = WeatherUiState.Idle
             _selectedWeather.value = null
             _suggestionsState.value = SuggestionsState.Hidden
+            lastSelectedLocation = null
             weatherJob?.cancel()
         } else if (query.length <= 2) {
             _suggestionsState.value = SuggestionsState.Hidden
@@ -89,9 +91,9 @@ class WeatherViewModel @Inject constructor(
 
     fun onSuggestionSelected(location: GeocodingResult) {
         isManualSearch = false
+        lastSelectedLocation = location
         _suggestionsState.value = SuggestionsState.Hidden
         _searchQuery.value = location.displayName
-        // We no longer call fetchWeather here immediately as per user request
     }
 
     private fun fetchWeather(location: GeocodingResult) {
@@ -140,6 +142,13 @@ class WeatherViewModel @Inject constructor(
         val query = _searchQuery.value.trim()
         if (query.isEmpty()) return
 
+        // If we already have a selected location matching the current query, use it directly
+        val cached = lastSelectedLocation
+        if (cached != null && cached.displayName == query) {
+            fetchWeather(cached)
+            return
+        }
+
         viewModelScope.launch {
             _suggestionsState.value = SuggestionsState.Hidden
             _weatherState.value = WeatherUiState.Loading
@@ -149,18 +158,15 @@ class WeatherViewModel @Inject constructor(
                 onSuccess = { list ->
                     val first = list.firstOrNull()
                     if (first != null) {
-                        isManualSearch = false
-                        _suggestionsState.value = SuggestionsState.Hidden
+                        lastSelectedLocation = first
                         _searchQuery.value = first.displayName
                         fetchWeather(first)
                     } else {
-                        _weatherState.value = WeatherUiState.Error("City '$query' not found. Try a different name.")
+                        _weatherState.value = WeatherUiState.Error("City '$query' not found.")
                     }
                 },
                 onFailure = { e ->
-                    _weatherState.value = WeatherUiState.Error(
-                        e.message ?: "Search failed. Check your connection."
-                    )
+                    _weatherState.value = WeatherUiState.Error("Connection error. Please try again.")
                 }
             )
         }

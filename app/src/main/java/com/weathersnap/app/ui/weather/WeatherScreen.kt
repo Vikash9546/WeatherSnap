@@ -13,6 +13,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -54,6 +55,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -219,54 +221,54 @@ private fun SuggestionsDropdown(
     state: SuggestionsState,
     onSuggestionSelected: (GeocodingResult) -> Unit
 ) {
+    if (state is SuggestionsState.Hidden) return
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, CardBorderColor, RoundedCornerShape(12.dp)),
+            .padding(vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E211A)),
+        border = BorderStroke(1.dp, Color(0xFF2B2F26))
     ) {
         when (state) {
             is SuggestionsState.Loading -> {
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.Center
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = AccentColor,
+                        modifier = Modifier.size(24.dp),
+                        color = Color(0xFFC2D68C), 
                         strokeWidth = 2.dp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "Searching...",
-                        color = SecondaryTextColor,
-                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
             is SuggestionsState.Loaded -> {
                 if (state.suggestions.isEmpty()) {
-                    Text(
-                        "No cities found",
-                        color = SecondaryTextColor,
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        items(state.suggestions) { suggestion ->
+                        Text("No cities found", color = Color(0xFF6B7264))
+                    }
+                } else {
+                    Column {
+                        state.suggestions.forEachIndexed { index, suggestion ->
                             SuggestionItem(
                                 suggestion = suggestion,
                                 onClick = { onSuggestionSelected(suggestion) }
                             )
-                            if (suggestion != state.suggestions.last()) {
-                                HorizontalDivider(color = CardBorderColor.copy(alpha = 0.5f))
+                            if (index < state.suggestions.size - 1) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    thickness = 1.dp,
+                                    color = Color(0xFF2B2F26)
+                                )
                             }
                         }
                     }
@@ -274,8 +276,8 @@ private fun SuggestionsDropdown(
             }
             is SuggestionsState.Error -> {
                 Text(
-                    "Error: ${state.message}",
-                    color = ErrorColor,
+                    text = state.message,
+                    color = Color.Red.copy(alpha = 0.7f),
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -290,39 +292,29 @@ private fun SuggestionItem(
     suggestion: GeocodingResult,
     onClick: () -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 10.dp, horizontal = 16.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Icon(
-            Icons.Default.LocationOn,
-            contentDescription = null,
-            tint = AccentColor,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Text(
-                text = suggestion.name,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFFE8F0D0),
-                fontWeight = FontWeight.Medium
-            )
-            val subtitle = buildString {
-                suggestion.admin1?.let { append(it) }
-                suggestion.country?.let {
-                    if (isNotEmpty()) append(", ")
-                    append(it)
-                }
-            }
-            if (subtitle.isNotEmpty()) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp),
+            shape = RoundedCornerShape(23.dp),
+            color = Color.Transparent,
+            border = BorderStroke(1.dp, Color(0xFF3E4338))
+        ) {
+            Box(contentAlignment = Alignment.Center) {
                 Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SecondaryTextColor
+                    text = suggestion.displayName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFFB4B9AE),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

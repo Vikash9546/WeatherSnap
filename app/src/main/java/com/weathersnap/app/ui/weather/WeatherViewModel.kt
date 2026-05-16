@@ -149,7 +149,10 @@ class WeatherViewModel @Inject constructor(
                 onSuccess = { list ->
                     val first = list.firstOrNull()
                     if (first != null) {
-                        onSuggestionSelected(first)
+                        isManualSearch = false
+                        _suggestionsState.value = SuggestionsState.Hidden
+                        _searchQuery.value = first.displayName
+                        fetchWeather(first)
                     } else {
                         _weatherState.value = WeatherUiState.Error("City '$query' not found. Try a different name.")
                     }

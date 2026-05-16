@@ -43,25 +43,38 @@ class CreateReportViewModel @Inject constructor(
     private val _compressedSize = MutableStateFlow<Long?>(null)
     val compressedSize: StateFlow<Long?> = _compressedSize.asStateFlow()
 
-    // Immutable weather snapshot - set once
-    private var weatherSnapshot: WeatherData? = null
+    private val _weatherSnapshot = MutableStateFlow<WeatherData?>(null)
+    val weatherSnapshot: StateFlow<WeatherData?> = _weatherSnapshot.asStateFlow()
 
-    fun initWithWeather(weather: WeatherData) {
-        if (weatherSnapshot != null) return // Already initialized, don't overwrite
-        weatherSnapshot = weather
+    fun initWithWeather(weather: WeatherData?) {
+        if (_weatherSnapshot.value != null) return // Already initialized
+        
         viewModelScope.launch {
-            // Restore draft from Room if exists (same city)
             val draft = draftRepository.getDraft()
-            if (draft != null && draft.cityName == weather.cityName) {
+            if (draft != null) {
+                // If we have a draft, prioritize it for recovery
+                _weatherSnapshot.value = WeatherData(
+                    cityName = draft.cityName,
+                    condition = draft.condition,
+                    temperature = draft.temperature,
+                    humidity = draft.humidity,
+                    windSpeed = draft.windSpeed,
+                    pressure = draft.pressure,
+                    weatherCode = 0 // Dummy or store in draft
+                )
                 _notes.value = draft.notes
                 _imagePath.value = draft.imagePath
                 _originalSize.value = draft.originalSize
                 _compressedSize.value = draft.compressedSize
+            } else if (weather != null) {
+                // No draft, use passed weather
+                _weatherSnapshot.value = weather
+                persistDraft()
             }
         }
     }
 
-    fun getWeatherSnapshot(): WeatherData? = weatherSnapshot
+    fun getWeatherSnapshot(): WeatherData? = _weatherSnapshot.value
 
     fun onNotesChanged(notes: String) {
         _notes.value = notes
@@ -85,7 +98,7 @@ class CreateReportViewModel @Inject constructor(
     }
 
     private fun persistDraft() {
-        val weather = weatherSnapshot ?: return
+        val weather = _weatherSnapshot.value ?: return
         viewModelScope.launch {
             draftRepository.saveDraft(
                 ReportDraftEntity(
@@ -105,7 +118,7 @@ class CreateReportViewModel @Inject constructor(
     }
 
     fun saveReport() {
-        val weather = weatherSnapshot ?: return
+        val weather = _weatherSnapshot.value ?: return
         val path = _imagePath.value ?: return
 
         viewModelScope.launch {

@@ -30,7 +30,17 @@ A high-fidelity weather reporting application built with modern Android developm
 - **Cleanup**: Automatic deletion of temporary high-res files after successful compression.
 - **Metadata**: EXIF rotation handling to ensure photos appear correctly regardless of device orientation.
 
-### 6. Room DB with IO-thread usage (9%)
+### 6. Lifecycle-Safe Draft Recovery (Developer Judgment)
+- **Problem**: Users might lose progress during report creation due to rotation or process death.
+- **Solution**: Implemented a **Room-backed Singleton Draft** system.
+- **Behavior**:
+    - Every change to notes or the captured photo is instantly persisted to a `report_drafts` table.
+    - Upon entering the Create Report screen, the app checks for an existing draft. If found, it restores the **exact weather snapshot**, notes, and image path, ensuring data continuity.
+    - The draft is only cleared once the report is successfully saved to the final repository.
+    - This approach avoids duplicates and ensures the weather data remains static (the snapshot at start time) even if the app was killed.
+- **Trade-offs**: Local DB overhead for every keystroke (mitigated by using a simple singleton table and Room's efficiency).
+
+### 7. Room DB with IO-thread usage (9%)
 - **Persistence**: Room database with `Flow` integration for reactive UI updates.
 - **Threading**: Use of `suspend` functions and `withContext(Dispatchers.IO)` in repositories.
 - **Cleanup**: Linked deletion of database records and their corresponding local image files.

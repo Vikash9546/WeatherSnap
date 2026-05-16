@@ -1,10 +1,10 @@
-# WeatherSnap 🌤️📸
+# WeatherSnap
 
 A production-grade Android weather reporting app built with Kotlin, Jetpack Compose, Hilt, Room, CameraX, and Retrofit.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category | Technology |
 |:---|:---|
@@ -19,7 +19,7 @@ A production-grade Android weather reporting app built with Kotlin, Jetpack Comp
 
 ---
 
-## 🚀 Setup & Run
+## Setup & Run
 
 ### Prerequisites
 - Android Studio **Ladybug** (2024.2+) or newer
@@ -49,7 +49,7 @@ Or simply open the project in Android Studio and press **Run ▶️**.
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 Clean Architecture with MVVM — three layers, unidirectional data flow:
 
@@ -72,7 +72,7 @@ com.weathersnap.app/
 
 ---
 
-## 📱 Features
+## Features
 
 - **Weather Search** — Debounced city search with Open-Meteo geocoding + weather API
 - **Create Report** — Capture photo, compress, annotate with notes, save locally
@@ -81,8 +81,6 @@ com.weathersnap.app/
 - **Draft Recovery** — Room-backed singleton draft survives rotation and process death
 
 ---
-
-## 🛡️ Developer Judgment: Lifecycle-Safe Draft Recovery
 
 **Problem**: User creates a report (selects weather → captures photo → enters notes) then rotates or backgrounds the app. Progress must survive without duplicates.
 
@@ -106,7 +104,3 @@ com.weathersnap.app/
 **Files:** `CreateReportViewModel.kt`, `ReportDraftEntity.kt`, `ReportDraftDao.kt`, `ReportDraftRepository.kt`, `ImageCompressor.kt`
 
 ---
-
-## 📄 License
-
-For educational and evaluation purposes.

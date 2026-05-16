@@ -331,31 +331,52 @@ private fun SuggestionItem(
 
 @Composable
 private fun WeatherIdleState() {
-    Box(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E211A))
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(vertical = 48.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Decorative gradient box
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(Color(0xFF33503B), Color(0xFF1E3D34))
+                        ),
+                        RoundedCornerShape(8.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Search. Capture. Save.",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFFB4B9AE),
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             Text(
-                text = "🌍",
-                fontSize = 64.sp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Search for a city",
+                text = "No weather loaded",
                 style = MaterialTheme.typography.titleMedium,
                 color = Color(0xFFE8F0D0),
-                textAlign = TextAlign.Center
+                fontWeight = FontWeight.Bold
             )
+            
+            Spacer(modifier = Modifier.height(4.dp))
+
             Text(
-                text = "Start typing to see suggestions",
-                style = MaterialTheme.typography.bodySmall,
-                color = SecondaryTextColor,
-                textAlign = TextAlign.Center
+                text = "Enter more than 2 letters, choose a city, then search.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFF6B7264)
             )
+            
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

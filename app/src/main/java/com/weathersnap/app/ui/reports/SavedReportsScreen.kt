@@ -12,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -28,6 +29,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -79,34 +83,57 @@ fun SavedReportsScreen(
             .systemBarsPadding()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Top bar
-            Row(
+            // Header
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(16.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
             ) {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = AccentColor)
-                }
-                Column {
-                    Text(
-                        text = "Saved Reports",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color(0xFFE8F0D0),
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (uiState is SavedReportsUiState.Success) {
-                        Text(
-                            text = "${(uiState as SavedReportsUiState.Success).reports.size} report(s)",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = SecondaryTextColor
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(Color(0xFFB4C88E), Color(0xFFC5D9A5))
+                            )
                         )
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Saved Reports",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color(0xFF1B2A1D),
+                                fontWeight = FontWeight.Bold
+                            )
+                            if (uiState is SavedReportsUiState.Success) {
+                                Text(
+                                    text = "${(uiState as SavedReportsUiState.Success).reports.size} report stored locally",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFF1B2A1D).copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                        
+                        Button(
+                            onClick = onNavigateBack,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D332F)),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.height(40.dp)
+                        ) {
+                            Text("Back", color = Color(0xFFE8F0D0), fontSize = 14.sp)
+                        }
                     }
                 }
             }
-
-            HorizontalDivider(color = CardBorderColor.copy(alpha = 0.5f))
 
             AnimatedContent(
                 targetState = uiState,
@@ -176,9 +203,9 @@ private fun ReportCard(report: WeatherReportEntity, index: Int, onDelete: () -> 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, CardBorderColor, RoundedCornerShape(16.dp)),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+                .padding(bottom = 8.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF2D3228)),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column {
@@ -186,9 +213,8 @@ private fun ReportCard(report: WeatherReportEntity, index: Int, onDelete: () -> 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                        .background(Color(0xFF0A0F05))
+                        .padding(12.dp)
+                        .clip(RoundedCornerShape(8.dp))
                 ) {
                     SubcomposeAsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
@@ -197,41 +223,23 @@ private fun ReportCard(report: WeatherReportEntity, index: Int, onDelete: () -> 
                             .build(),
                         contentDescription = "Report photo",
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f),
                         loading = {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator(color = AccentColor, modifier = Modifier.size(24.dp))
-                            }
-                        },
-                        error = {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("📷", fontSize = 32.sp)
+                                CircularProgressIndicator(color = Color(0xFFC2D68C), modifier = Modifier.size(24.dp))
                             }
                         }
                     )
-
-                    // Timestamp badge
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(8.dp)
-                            .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = formatTimestamp(report.timestamp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White
-                        )
-                    }
                 }
 
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // City & condition
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    // City & Temperature Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -243,72 +251,69 @@ private fun ReportCard(report: WeatherReportEntity, index: Int, onDelete: () -> 
                             Text(
                                 text = report.condition,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = AccentColor
+                                color = Color(0xFFB4B9AE)
+                            )
+                            Text(
+                                text = formatTimestamp(report.timestamp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF6B7264)
                             )
                         }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFF323B06), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                        ) {
                             Text(
                                 text = "${report.temperature}°C",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = AccentColor,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color(0xFFC2D68C),
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete Report",
-                                    tint = ErrorColor,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    // Stats row
+                    // Size Comparison Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        StatBadge("💧", "${report.humidity}%", modifier = Modifier.weight(1f))
-                        StatBadge("💨", "${report.windSpeed} km/h", modifier = Modifier.weight(1f))
-                        StatBadge("🔽", "${report.pressure} hPa", modifier = Modifier.weight(1f))
+                        FileSizeCard(
+                            label = "Original",
+                            sizeBytes = report.originalSize,
+                            backgroundColor = Color(0xFF3A382D),
+                            valueColor = Color(0xFFB08C4A),
+                            modifier = Modifier.weight(1f)
+                        )
+                        FileSizeCard(
+                            label = "Compressed",
+                            sizeBytes = report.compressedSize,
+                            backgroundColor = Color(0xFF323831),
+                            valueColor = Color(0xFF5A8B7A),
+                            modifier = Modifier.weight(1f)
+                        )
                     }
 
-                    // Notes
+                    // Notes/Tag
                     if (report.notes.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(10.dp))
-                        HorizontalDivider(color = CardBorderColor.copy(alpha = 0.4f))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "📝 ${report.notes}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = SecondaryTextColor
-                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFF383C33), RoundedCornerShape(4.dp))
+                                .padding(horizontal = 8.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = report.notes,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFFB4B9AE)
+                            )
+                        }
                     }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-                    HorizontalDivider(color = CardBorderColor.copy(alpha = 0.4f))
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Image sizes
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        FileSizeInfo(label = "Original", sizeBytes = report.originalSize)
-                        FileSizeInfo(label = "Compressed", sizeBytes = report.compressedSize)
-                        val ratio = if (report.originalSize > 0)
-                            (report.compressedSize * 100 / report.originalSize) else 100
-                        Text(
-                            text = "Saved ${100 - ratio}%",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = AccentColor,
-                            modifier = Modifier.align(Alignment.CenterVertically)
-                        )
-                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -335,19 +340,31 @@ private fun StatBadge(icon: String, value: String, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun FileSizeInfo(label: String, sizeBytes: Long) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "%.1f KB".format(sizeBytes / 1024.0),
-            style = MaterialTheme.typography.labelMedium,
-            color = Color(0xFFE8F0D0),
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = SecondaryTextColor
-        )
+private fun FileSizeCard(
+    label: String,
+    sizeBytes: Long,
+    backgroundColor: Color,
+    valueColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .background(backgroundColor, RoundedCornerShape(8.dp))
+            .padding(12.dp)
+    ) {
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFFB4B9AE)
+            )
+            Text(
+                text = "${sizeBytes / 1024} KB",
+                style = MaterialTheme.typography.labelMedium,
+                color = valueColor,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

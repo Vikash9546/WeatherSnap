@@ -30,15 +30,18 @@ A high-fidelity weather reporting application built with modern Android developm
 - **Cleanup**: Automatic deletion of temporary high-res files after successful compression.
 - **Metadata**: EXIF rotation handling to ensure photos appear correctly regardless of device orientation.
 
-### 6. Lifecycle-Safe Draft Recovery (Developer Judgment)
-- **Problem**: Users might lose progress during report creation due to rotation or process death.
-- **Solution**: Implemented a **Room-backed Singleton Draft** system.
+### 6. Lifecycle-Safe Draft Recovery (Developer Judgment Challenge)
+- **Problem**: Users risk losing progress during report creation due to orientation changes, app backgrounding, or complete process death. Simply restoring the draft naively could lead to stale weather data or leaked files if they switch cities.
+- **Solution**: Implemented an intelligent **Room-backed Singleton Draft** system.
 - **Behavior**:
-    - Every change to notes or the captured photo is instantly persisted to a `report_drafts` table.
-    - Upon entering the Create Report screen, the app checks for an existing draft. If found, it restores the **exact weather snapshot**, notes, and image path, ensuring data continuity.
-    - The draft is only cleared once the report is successfully saved to the final repository.
-    - This approach avoids duplicates and ensures the weather data remains static (the snapshot at start time) even if the app was killed.
-- **Trade-offs**: Local DB overhead for every keystroke (mitigated by using a simple singleton table and Room's efficiency).
+    - **Instant Persistence**: Every keystroke in the "Field Notes" and any new photo captured is instantly written to a `report_drafts` table in the local Room DB.
+    - **Process Death & Rotation Recovery**: Upon entering `CreateReportScreen`, the app queries the local draft. If the app is recovering from process death (where the passed weather is `null`), it fully restores the **exact weather snapshot**, notes, and image.
+    - **Intelligent City Switching**: If the user backs out and starts a new report for a *different* city:
+        1. The app detects the city mismatch.
+        2. It immediately deletes the previous draft's image file from the device to **prevent image file leaks**.
+        3. It clears the old draft in the DB and starts fresh for the new city.
+    - **No Duplicates**: The draft is strictly cleared only after the final report is successfully saved, ensuring the UI remains robust and error-free.
+- **Trade-offs**: Minor local DB overhead for real-time draft saving, heavily mitigated by the efficiency of Room and using a single-row "singleton" table layout.
 
 ### 7. Room DB with IO-thread usage (9%)
 - **Persistence**: Room database with `Flow` integration for reactive UI updates.

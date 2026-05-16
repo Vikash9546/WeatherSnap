@@ -52,20 +52,30 @@ class CreateReportViewModel @Inject constructor(
         viewModelScope.launch {
             val draft = draftRepository.getDraft()
             if (draft != null) {
-                // If we have a draft, prioritize it for recovery
-                _weatherSnapshot.value = WeatherData(
-                    cityName = draft.cityName,
-                    condition = draft.condition,
-                    temperature = draft.temperature,
-                    humidity = draft.humidity,
-                    windSpeed = draft.windSpeed,
-                    pressure = draft.pressure,
-                    weatherCode = 0 // Dummy or store in draft
-                )
-                _notes.value = draft.notes
-                _imagePath.value = draft.imagePath
-                _originalSize.value = draft.originalSize
-                _compressedSize.value = draft.compressedSize
+                if (weather == null || draft.cityName == weather.cityName) {
+                    // Restore draft (process death recovery or same city)
+                    _weatherSnapshot.value = WeatherData(
+                        cityName = draft.cityName,
+                        condition = draft.condition,
+                        temperature = draft.temperature,
+                        humidity = draft.humidity,
+                        windSpeed = draft.windSpeed,
+                        pressure = draft.pressure,
+                        weatherCode = 0
+                    )
+                    _notes.value = draft.notes
+                    _imagePath.value = draft.imagePath
+                    _originalSize.value = draft.originalSize
+                    _compressedSize.value = draft.compressedSize
+                } else {
+                    // Different city selected! Discard old draft and its image
+                    draft.imagePath?.let { ImageCompressor.deleteSafely(it) }
+                    draftRepository.clearDraft()
+                    
+                    // Initialize with new weather
+                    _weatherSnapshot.value = weather
+                    persistDraft()
+                }
             } else if (weather != null) {
                 // No draft, use passed weather
                 _weatherSnapshot.value = weather

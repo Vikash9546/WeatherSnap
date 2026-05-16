@@ -452,16 +452,26 @@ private fun WeatherSuccessState(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF2B2F26), RoundedCornerShape(8.dp))
-                    .padding(12.dp)
+                    .background(Color(0xFF2D3228), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Report readiness", color = Color(0xFF6B7264), fontSize = 12.sp)
-                    Text("Camera and Room DB enabled", color = Color(0xFFB4B9AE), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Report readiness",
+                        color = Color(0xFF6C7164),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "Camera and Room DB enabled",
+                        color = Color(0xFFB9BDB0),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 

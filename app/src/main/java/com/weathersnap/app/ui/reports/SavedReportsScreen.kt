@@ -389,29 +389,45 @@ private fun FileSizeCard(
 
 @Composable
 private fun EmptyReportsState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF2D3228))
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(32.dp)
-        ) {
-            Text("📋", fontSize = 64.sp)
-            Spacer(modifier = Modifier.height(16.dp))
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Decorative gradient box
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(Color(0xFF33503B), Color(0xFF1E3D34))
+                        ),
+                        RoundedCornerShape(8.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No reports yet",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFFE8F0D0),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             Text(
-                text = "No reports yet",
-                style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFFE8F0D0),
-                textAlign = TextAlign.Center
+                text = "Create and save a weather report to see image, notes, and weather details here.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFFB4B9AE),
+                lineHeight = 20.sp
             )
+            
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Search for a city, capture a photo and save your first weather report.",
-                style = MaterialTheme.typography.bodySmall,
-                color = SecondaryTextColor,
-                textAlign = TextAlign.Center
-            )
         }
     }
 }
